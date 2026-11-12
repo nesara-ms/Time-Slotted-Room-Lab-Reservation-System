@@ -1,9 +1,7 @@
 # Time-Slotted-Room-Lab-Reservation-System
 A Django-based room and laboratory reservation system that manages hourly time slots, prevents double bookings, and streamlines resource allocation for universities and collaborative workspaces.
 
-# Time-Slotted Room & Lab Reservation System
-
-A Django-based web application developed as part of the **SKILL CLASS journey at PES College of Engineering (PESCE)**. The project focuses on simplifying the reservation and management of university meeting rooms, laboratories, and shared equipment through structured time-slot scheduling.
+A web application developed as part of the **SKILL CLASS journey at PES College of Engineering (PESCE)**. The project focuses on simplifying the reservation and management of university meeting rooms, laboratories, and shared equipment through structured time-slot scheduling.
 
 ## 🎓 Academic Context
 
