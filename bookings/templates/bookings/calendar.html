@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Calendar{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div><h1>Availability Calendar</h1><p class="muted">{{ day|date:"l, d F Y" }}</p></div>
+  <a class="btn btn-primary" href="{% url 'booking_create' %}?date={{ day|date:'Y-m-d' }}">+ New Reservation</a>
+</div>
+
+<div class="card toolbar">
+  <div class="day-nav">
+    <a class="btn btn-sm btn-outline" href="?date={{ prev_day|date:'Y-m-d' }}&type={{ rtype }}">← Prev</a>
+    <a class="btn btn-sm btn-outline" href="?type={{ rtype }}">Today</a>
+    <a class="btn btn-sm btn-outline" href="?date={{ next_day|date:'Y-m-d' }}&type={{ rtype }}">Next →</a>
+  </div>
+  <form method="get" id="calendar-filter" class="filter-form">
+    <input type="date" name="date" id="cal-date" value="{{ day|date:'Y-m-d' }}">
+    <select name="type" id="cal-type">
+      <option value="">All resource types</option>
+      {% for value, label in types %}
+      <option value="{{ value }}" {% if rtype == value %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+  </form>
+</div>
+
+<div class="legend">
+  <span><i class="swatch slot-free"></i> Free (click to book)</span>
+  <span><i class="swatch slot-pending"></i> Pending approval</span>
+  <span><i class="swatch slot-approved"></i> Booked (approved)</span>
+  <span><i class="swatch slot-past"></i> Past</span>
+</div>
+
+<div class="card no-pad">
+  <div class="table-scroll">
+    <table class="calendar" id="calendar-table" data-today="{{ is_today|yesno:'1,0' }}">
+      <thead>
+        <tr>
+          <th class="res-col">Resource</th>
+          {% for h in hours %}<th class="hour-col" data-hour="{{ h|slice:':2' }}">{{ h }}</th>{% endfor %}
+        </tr>
+      </thead>
+      <tbody>
+      {% for row in rows %}
+        <tr>
+          <th class="res-col">
+            <strong>{{ row.resource.icon }} {{ row.resource.name }}</strong>
+            <small>{{ row.resource.get_resource_type_display }} &middot; {{ row.free }} free</small>
+          </th>
+          {% for c in row.cells %}
+          <td class="slot slot-{{ c.status }}" data-hour="{{ c.hour }}" data-info="{{ c.info }}">
+            {% if c.status == 'free' %}
+              <a href="{% url 'booking_create' %}?resource={{ row.resource.id }}&date={{ day|date:'Y-m-d' }}&start={{ c.start }}&end={{ c.end }}" title="Book {{ c.start }}-{{ c.end }}">+</a>
+            {% elif c.status == 'approved' %}Booked
+            {% elif c.status == 'pending' %}Pending
+            {% else %}&ndash;{% endif %}
+          </td>
+          {% endfor %}
+        </tr>
+      {% empty %}
+        <tr><td class="center muted" style="padding:2rem">No resources to display.</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
+{% block extra_js %}<script src="{% static 'bookings/js/calendar.js' %}"></script>{% endblock %}

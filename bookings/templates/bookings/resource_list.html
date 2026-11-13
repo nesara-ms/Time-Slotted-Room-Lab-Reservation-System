@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+{% block title %}Resources{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div><h1>Resources</h1><p class="muted">Meeting rooms, laboratories and equipment</p></div>
+  {% if is_manager %}<a class="btn btn-primary" href="{% url 'resource_create' %}">+ Add Resource</a>{% endif %}
+</div>
+
+<div class="chips">
+  <a href="{% url 'resource_list' %}" class="chip {% if not rtype %}active{% endif %}">All</a>
+  {% for value, label in types %}
+  <a href="?type={{ value }}" class="chip {% if rtype == value %}active{% endif %}">{{ label }}</a>
+  {% endfor %}
+</div>
+
+<div class="cards-grid">
+  {% for r in resources %}
+  <article class="card resource-card {% if not r.is_active %}inactive{% endif %}">
+    <div class="resource-top">
+      <span class="resource-icon">{{ r.icon }}</span>
+      <span class="badge badge-type">{{ r.get_resource_type_display }}</span>
+    </div>
+    <h3>{{ r.name }}</h3>
+    <p class="muted small">📍 {{ r.location|default:"Location not set" }} &middot; Capacity: {{ r.capacity }}</p>
+    <p class="small">{{ r.description|default:"No description." }}</p>
+    <p class="small muted">Manager: {{ r.manager.username|default:"Any manager" }}</p>
+    {% if not r.is_active %}<span class="badge badge-rejected">Inactive</span>{% endif %}
+    <div class="card-actions">
+      {% if r.is_active %}<a class="btn btn-sm btn-primary" href="{% url 'booking_create' %}?resource={{ r.id }}">Book</a>{% endif %}
+      <a class="btn btn-sm btn-outline" href="{% url 'calendar' %}?type={{ r.resource_type }}">Calendar</a>
+      {% if is_manager %}
+      <a class="btn btn-sm btn-outline" href="{% url 'resource_update' r.pk %}">Edit</a>
+      <a class="btn btn-sm btn-danger" href="{% url 'resource_delete' r.pk %}">Delete</a>
+      {% endif %}
+    </div>
+  </article>
+  {% empty %}
+  <p class="muted">No resources found.</p>
+  {% endfor %}
+</div>
+{% endblock %}

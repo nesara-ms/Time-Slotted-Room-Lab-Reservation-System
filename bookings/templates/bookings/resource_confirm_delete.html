@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% block title %}Delete Resource{% endblock %}
+{% block content %}
+<div class="card form-card">
+  <h1>Delete "{{ resource.name }}"?</h1>
+  <p class="muted">This permanently deletes the resource <strong>and all of its reservations</strong>.
+     To hide it temporarily, edit it and untick "Is active" instead.</p>
+  <form method="post" class="form-actions">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-danger">Yes, delete</button>
+    <a href="{% url 'resource_list' %}" class="btn btn-outline">Cancel</a>
+  </form>
+</div>
+{% endblock %}

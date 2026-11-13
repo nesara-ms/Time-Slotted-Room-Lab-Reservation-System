@@ -1,0 +1,128 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+
+<!-- ===== Welcome ===== -->
+<section class="welcome-hero">
+  <div class="welcome-text">
+    <p class="welcome-date">{{ today|date:"l, d F Y" }}</p>
+    <h1 class="welcome-title">
+      <span id="greeting-text">{{ greeting }}</span>, {{ display_name|capfirst }}!
+      <span id="greeting-icon" aria-hidden="true">{{ greeting_icon }}</span>
+    </h1>
+    <p class="welcome-sub">Welcome back! Ready to plan your next productive session?</p>
+    <p class="welcome-desc">
+      Manage your room and laboratory reservations effortlessly. Find available resources,
+      schedule your sessions, and keep track of your bookings in one place.
+    </p>
+    <div class="welcome-actions">
+      <a class="btn btn-light" href="{% url 'booking_create' %}">+ New Reservation</a>
+      <a class="btn btn-ghost" href="{% url 'calendar' %}">View Calendar</a>
+    </div>
+  </div>
+</section>
+
+<!-- ===== Resources at a glance (compact, no images) ===== -->
+<h2 class="section-title">Resources at a glance</h2>
+<section class="stats-grid">
+  <div class="stat-card">
+    <div><div class="stat-num">{{ glance.rooms }}</div><div class="stat-label">Meeting Rooms</div></div>
+  </div>
+  <div class="stat-card">
+    <div><div class="stat-num">{{ glance.labs }}</div><div class="stat-label">Laboratories</div></div>
+  </div>
+  <div class="stat-card">
+    <div><div class="stat-num">{{ glance.equipment }}</div><div class="stat-label">Equipment</div></div>
+  </div>
+  <div class="stat-card accent-green">
+    <div><div class="stat-num">{{ glance.free_slots }}<small>/{{ glance.total_slots }}</small></div><div class="stat-label">Free slots today</div></div>
+  </div>
+</section>
+
+{% if manager_mode %}
+<!-- ===== Manager view ===== -->
+<div class="grid-2">
+  <section class="card">
+    <h2>Booking statistics</h2>
+    <div class="bar-row"><span>Approved</span><div class="bar"><div class="bar-fill fill-green" style="width: {% widthratio manager_stats.approved manager_stats.total 100 %}%"></div></div><b>{{ manager_stats.approved }}</b></div>
+    <div class="bar-row"><span>Pending</span><div class="bar"><div class="bar-fill fill-amber" style="width: {% widthratio manager_stats.pending manager_stats.total 100 %}%"></div></div><b>{{ manager_stats.pending }}</b></div>
+    <div class="bar-row"><span>Rejected</span><div class="bar"><div class="bar-fill fill-red" style="width: {% widthratio manager_stats.rejected manager_stats.total 100 %}%"></div></div><b>{{ manager_stats.rejected }}</b></div>
+    <p class="muted small mt">{{ manager_stats.total }} total requests &middot; {{ manager_stats.approved_today }} approved for today</p>
+  </section>
+
+  <section class="card">
+    <div class="card-head">
+      <h2>Pending approvals <span class="count-pill">{{ manager_stats.pending }}</span></h2>
+      <a href="{% url 'manager_dashboard' %}">Open queue &rarr;</a>
+    </div>
+    {% for b in pending_preview %}
+    <div class="list-item">
+      <div>
+        <strong>{{ b.resource.name }}</strong>
+        <div class="muted small">
+          {{ b.user.get_full_name|default:b.user.username }} &middot;
+          {{ b.date|date:"D, d M" }} &middot; {{ b.start_time|time:"H:i" }}–{{ b.end_time|time:"H:i" }}
+        </div>
+      </div>
+      <a class="btn btn-sm btn-outline" href="{% url 'manager_dashboard' %}">Review</a>
+    </div>
+    {% empty %}
+    <p class="muted">No pending requests. The queue is clear.</p>
+    {% endfor %}
+  </section>
+</div>
+
+<section class="card">
+  <div class="card-head">
+    <h2>Upcoming reservations</h2>
+    <a href="{% url 'calendar' %}">Open calendar &rarr;</a>
+  </div>
+  {% for b in upcoming %}
+  <div class="list-item">
+    <div>
+      <strong>{{ b.resource.name }}</strong>
+      <div class="muted small">
+        {{ b.date|date:"D, d M" }} &middot; {{ b.start_time|time:"H:i" }}–{{ b.end_time|time:"H:i" }}
+        &middot; {{ b.user.get_full_name|default:b.user.username }}
+      </div>
+    </div>
+    <span class="badge badge-{{ b.status }}">{{ b.get_status_display }}</span>
+  </div>
+  {% empty %}
+  <p class="muted">No upcoming approved reservations.</p>
+  {% endfor %}
+</section>
+
+{% else %}
+<!-- ===== Normal user view ===== -->
+<div class="grid-2">
+  <section class="card">
+    <h2>My booking statistics</h2>
+    <div class="bar-row"><span>Approved</span><div class="bar"><div class="bar-fill fill-green" style="width: {% widthratio my_stats.approved my_stats.total 100 %}%"></div></div><b>{{ my_stats.approved }}</b></div>
+    <div class="bar-row"><span>Rejected</span><div class="bar"><div class="bar-fill fill-red" style="width: {% widthratio my_stats.rejected my_stats.total 100 %}%"></div></div><b>{{ my_stats.rejected }}</b></div>
+    <p class="muted small mt">{{ my_stats.total }} total reservations &middot; {{ my_stats.approved_today }} approved for today</p>
+  </section>
+
+  <section class="card">
+    <div class="card-head">
+      <h2>My upcoming reservations</h2>
+      <a href="{% url 'my_bookings' %}">View all &rarr;</a>
+    </div>
+    {% for b in upcoming %}
+    <div class="list-item">
+      <div>
+        <strong>{{ b.resource.name }}</strong>
+        <div class="muted small">{{ b.date|date:"D, d M" }} &middot; {{ b.start_time|time:"H:i" }}–{{ b.end_time|time:"H:i" }}</div>
+      </div>
+      <span class="badge badge-{{ b.status }}">{{ b.get_status_display }}</span>
+    </div>
+    {% empty %}
+    <p class="muted">No upcoming reservations. <a href="{% url 'booking_create' %}">Make one now</a>.</p>
+    {% endfor %}
+  </section>
+</div>
+{% endif %}
+
+{% endblock %}
+{% block extra_js %}<script src="{% static 'bookings/js/dashboard.js' %}"></script>{% endblock %}

@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+{% block title %}Approvals{% endblock %}
+{% block content %}
+<div class="page-head"><div><h1>Manager Dashboard</h1><p class="muted">Moderation queue for reservation requests</p></div></div>
+
+<section class="stats-grid">
+  <div class="stat-card accent-amber"><span class="stat-icon">⏳</span><div><div class="stat-num">{{ stats.pending }}</div><div class="stat-label">Pending requests</div></div></div>
+  <div class="stat-card"><span class="stat-icon">📆</span><div><div class="stat-num">{{ stats.approved_today }}</div><div class="stat-label">Approved for today</div></div></div>
+  <div class="stat-card"><span class="stat-icon">✅</span><div><div class="stat-num">{{ stats.approved_total }}</div><div class="stat-label">Total approved</div></div></div>
+  <div class="stat-card"><span class="stat-icon">❌</span><div><div class="stat-num">{{ stats.rejected_total }}</div><div class="stat-label">Total rejected</div></div></div>
+</section>
+
+<h2 class="section-title">Pending requests</h2>
+<div class="cards-grid">
+  {% for b in pending %}
+  <article class="card request-card">
+    <div class="resource-top">
+      <strong>{{ b.resource.icon }} {{ b.resource.name }}</strong>
+      <span class="badge badge-pending">Pending</span>
+    </div>
+    <p class="mt-s">📅 {{ b.date|date:"D, d M Y" }} &middot; ⏰ {{ b.start_time|time:"H:i" }} – {{ b.end_time|time:"H:i" }}</p>
+    <p class="small">👤 {{ b.user.get_full_name|default:b.user.username }}{% if b.user.profile.department %} ({{ b.user.profile.department }}){% endif %}</p>
+    <p class="small"><strong>Purpose:</strong> {{ b.purpose }}</p>
+    <form method="post" action="{% url 'review_booking' b.pk %}">
+      {% csrf_token %}
+      <input type="text" name="note" placeholder="Optional note to the requester">
+      <div class="form-actions">
+        <button name="action" value="approve" class="btn btn-success btn-sm">✔ Approve</button>
+        <button name="action" value="reject" class="btn btn-danger btn-sm">✖ Reject</button>
+      </div>
+    </form>
+  </article>
+  {% empty %}
+  <div class="card"><p class="muted">🎉 No pending requests. The queue is clear.</p></div>
+  {% endfor %}
+</div>
+
+<h2 class="section-title">Recently reviewed</h2>
+<div class="card no-pad">
+  <div class="table-scroll">
+    <table class="table">
+      <thead><tr><th>Resource</th><th>Requester</th><th>Date</th><th>Time</th><th>Status</th><th>Reviewed by</th><th>Note</th></tr></thead>
+      <tbody>
+      {% for b in reviewed %}
+        <tr>
+          <td>{{ b.resource.name }}</td>
+          <td>{{ b.user.username }}</td>
+          <td>{{ b.date|date:"d M Y" }}</td>
+          <td>{{ b.start_time|time:"H:i" }}–{{ b.end_time|time:"H:i" }}</td>
+          <td><span class="badge badge-{{ b.status }}">{{ b.get_status_display }}</span></td>
+          <td>{{ b.reviewed_by.username|default:"—" }}</td>
+          <td class="small">{{ b.manager_note|default:"—" }}</td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="7" class="center muted" style="padding:1.5rem">Nothing reviewed yet.</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

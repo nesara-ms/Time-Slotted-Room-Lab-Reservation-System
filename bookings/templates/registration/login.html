@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+{% block title %}Login{% endblock %}
+{% block content %}
+<div class="auth-wrap">
+  <div class="card auth-card">
+    <div class="auth-logo">📅</div>
+    <h1>ReserveHub</h1>
+    <p class="muted center">Room &amp; Lab Reservation System</p>
+    <form method="post">
+      {% csrf_token %}
+      {% include 'partials/form_fields.html' %}
+      <input type="hidden" name="next" value="{{ next }}">
+      <button type="submit" class="btn btn-primary btn-block">Login</button>
+    </form>
+    <p class="center muted mt">New here? <a href="{% url 'register' %}">Create an account</a></p>
+  </div>
+</div>
+{% endblock %}

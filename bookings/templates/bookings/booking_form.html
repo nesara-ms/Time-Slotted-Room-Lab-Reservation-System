@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}New Reservation{% endblock %}
+{% block content %}
+<div class="page-head"><div><h1>New Reservation</h1><p class="muted">Requests are reviewed by the room manager.</p></div></div>
+
+<div class="grid-2 form-layout">
+  <div class="card">
+    <form method="post" id="booking-form" data-availability-url="{% url 'availability_api' %}">
+      {% csrf_token %}
+      {% include 'partials/form_fields.html' %}
+      <div id="conflict-warning" class="alert alert-error" hidden></div>
+      <div class="form-actions">
+        <button type="submit" id="submit-btn" class="btn btn-primary">Submit request</button>
+        <a href="{% url 'calendar' %}" class="btn btn-outline">View calendar</a>
+      </div>
+    </form>
+  </div>
+
+  <aside class="card">
+    <h2>Already booked on this date</h2>
+    <p class="muted small">Select a resource and date to see occupied time ranges.</p>
+    <ul id="booked-list" class="booked-list"><li class="muted">Nothing selected yet.</li></ul>
+    <hr>
+    <p class="small muted">⏰ Bookable hours: {{ 8 }}:00 – {{ 20 }}:00.<br>
+       Overlapping bookings for the same resource are rejected automatically.</p>
+  </aside>
+</div>
+{% endblock %}
+{% block extra_js %}<script src="{% static 'bookings/js/booking_form.js' %}"></script>{% endblock %}

@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% block title %}My Bookings{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div><h1>Booking History</h1><p class="muted">Pending, approved, rejected and cancelled reservations</p></div>
+  <a class="btn btn-primary" href="{% url 'booking_create' %}">+ New Reservation</a>
+</div>
+
+<div class="chips">
+  <a href="{% url 'my_bookings' %}" class="chip {% if not status %}active{% endif %}">All ({{ counts.all }})</a>
+  <a href="?status=pending" class="chip {% if status == 'pending' %}active{% endif %}">Pending ({{ counts.pending }})</a>
+  <a href="?status=approved" class="chip {% if status == 'approved' %}active{% endif %}">Approved ({{ counts.approved }})</a>
+  <a href="?status=rejected" class="chip {% if status == 'rejected' %}active{% endif %}">Rejected ({{ counts.rejected }})</a>
+  <a href="?status=cancelled" class="chip {% if status == 'cancelled' %}active{% endif %}">Cancelled ({{ counts.cancelled }})</a>
+</div>
+
+<div class="card no-pad">
+  <div class="table-scroll">
+    <table class="table">
+      <thead><tr><th>Resource</th><th>Date</th><th>Time</th><th>Purpose</th><th>Status</th><th>Manager note</th><th></th></tr></thead>
+      <tbody>
+      {% for b in bookings %}
+        <tr>
+          <td><strong>{{ b.resource.icon }} {{ b.resource.name }}</strong></td>
+          <td>{{ b.date|date:"d M Y" }}</td>
+          <td>{{ b.start_time|time:"H:i" }} – {{ b.end_time|time:"H:i" }}</td>
+          <td>{{ b.purpose }}</td>
+          <td><span class="badge badge-{{ b.status }}">{{ b.get_status_display }}</span></td>
+          <td class="small">{% if b.manager_note %}{{ b.manager_note }}{% else %}<span class="muted">—</span>{% endif %}</td>
+          <td>
+            {% if b.can_cancel %}
+            <form method="post" action="{% url 'booking_cancel' b.pk %}" data-confirm="Cancel this reservation?">
+              {% csrf_token %}<button class="btn btn-sm btn-danger">Cancel</button>
+            </form>
+            {% endif %}
+          </td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="7" class="center muted" style="padding:2rem">No reservations found.</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

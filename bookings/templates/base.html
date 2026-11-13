@@ -1,0 +1,53 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Home{% endblock %} | ReserveHub</title>
+  <link rel="stylesheet" href="{% static 'bookings/css/style.css' %}">
+</head>
+<body>
+{% if user.is_authenticated %}
+<header class="navbar">
+  <a href="{% url 'dashboard' %}" class="brand">📅 ReserveHub</a>
+  <button class="nav-toggle" id="nav-toggle" aria-label="Toggle menu">☰</button>
+  <nav class="nav-links" id="nav-links">
+    <a href="{% url 'dashboard' %}" class="{% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">Dashboard</a>
+    <a href="{% url 'calendar' %}" class="{% if request.resolver_match.url_name == 'calendar' %}active{% endif %}">Calendar</a>
+    <a href="{% url 'resource_list' %}" class="{% if 'resource' in request.resolver_match.url_name %}active{% endif %}">Resources</a>
+    <a href="{% url 'booking_create' %}" class="{% if request.resolver_match.url_name == 'booking_create' %}active{% endif %}">Book</a>
+    <a href="{% url 'my_bookings' %}" class="{% if request.resolver_match.url_name == 'my_bookings' %}active{% endif %}">My Bookings</a>
+    {% if is_manager %}
+    <a href="{% url 'manager_dashboard' %}" class="{% if 'manager' in request.resolver_match.url_name %}active{% endif %}">
+      Approvals {% if nav_pending_count %}<span class="nav-badge">{{ nav_pending_count }}</span>{% endif %}
+    </a>
+    {% endif %}
+    <span class="nav-user">
+      👤 {{ user.username }}{% if is_manager %} <small class="role-tag">Manager</small>{% endif %}
+    </span>
+    <form method="post" action="{% url 'logout' %}" class="logout-form">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-sm btn-outline-light">Logout</button>
+    </form>
+  </nav>
+</header>
+{% endif %}
+
+<main class="container">
+  {% if messages %}
+  <div class="messages">
+    {% for message in messages %}
+    <div class="alert alert-{{ message.tags }}" role="alert">{{ message }}<button class="alert-close" aria-label="Close">&times;</button></div>
+    {% endfor %}
+  </div>
+  {% endif %}
+  {% block content %}{% endblock %}
+</main>
+
+<footer class="footer">Time-Slotted Room &amp; Lab Reservation System &middot; Django project</footer>
+
+<script src="{% static 'bookings/js/main.js' %}"></script>
+{% block extra_js %}{% endblock %}
+</body>
+</html>
