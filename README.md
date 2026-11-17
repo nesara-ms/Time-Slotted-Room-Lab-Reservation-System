@@ -83,23 +83,6 @@ The project follows a two-phase development approach as part of the SKILL CLASS 
 - Developing the approval workflow for room managers.
 - Testing the application and refining its functionality.
 
-## 📂 Project Structure
-
-```text
-Time-Slotted-Room-Lab-Reservation-System/
-│
-├── bookings/
-├── config/
-├── templates/
-├── static/
-├── manage.py
-├── requirements.txt
-├── README.md
-└── .gitignore
-```
-
-*Note: The directory structure may vary depending on the final implementation.*
-
 ## 🚀 Getting Started
 
 ### Prerequisites
